@@ -1,6 +1,6 @@
 ---
 title: "Activity 9"
-author: "Name"
+author: "Andrew Hodge"
 output: github_document
 ---
 
@@ -14,6 +14,10 @@ In this activity, we will create a function for calculating the range of a numer
 
 To begin, we need `{tidyverse}` and `{gapminder}` (for a dataset to test our functions with) packages loaded.
 
+```{r}
+library(tidyverse)
+library(gapminder)
+```
 
 
 
@@ -27,6 +31,23 @@ Remember that in statistics *range = max - min*.
 Describe how you could you use the output from some combination of the above functions to calculate the range?
 Note that I can think of two different methods: 1) using `min` and `max`, and 2) using `range` with the square bracket (`[]`) method.
 
+```{r}
+head(gapminder)
+```
+
+```{r range}
+  x1 <- c(1:10)
+  x2 <- c(5:100)
+  
+  check_range <- function (x) {
+    max(x)-min(x)
+  }
+  
+  check_range(x1)
+  check_range(x2)
+  check_range(gapminder$pop)
+  check_range(gapminder$gdpPercap)
+```
 
 
 
@@ -34,16 +55,9 @@ I will walk through creating a function using the second method.
 Whenever I write a function, I start with a specific example that works.
 
 ```{r simple_example}
-# see what an already existing function produces
 range(gapminder$lifeExp)
-
-# pull larger value
 range(gapminder$lifeExp)[2]
-
-# pull smaller value
 range(gapminder$lifeExp)[1]
-
-# calculate statistical range
 range(gapminder$lifeExp)[2] - range(gapminder$lifeExp)[1]
 ```
 
@@ -51,16 +65,11 @@ Next, I will try to generalize the work.
 That is, I am trying to determine which values/calculations "change" and which values/calculations stay the same.
 
 ```{r generalized}
-# set changing values
 range_results <- range(gapminder$lifeExp)
 larger_value <- range_results[2]
 smaller_value <- range_results[1]
-
-# perform calculation that stays the same
 diff_values <- larger_value - smaller_value
-
-# could also simply do
-# diff_values <- range_results[2] - range_results[1]
+diff_values
 ```
 
 Now I see that `gapminder$lifeExp` is the only thing that changes whenever I want to calculate the range so I have an outline for my function!
@@ -78,12 +87,10 @@ Below, create our new range function that, when supplied with a variable/vector 
 
 ```{r diff_range}
 diff_range <- function(x){
-  # set changing values
   range_results <- range(x)
   larger_value <- range_results[2]
   smaller_value <- range_results[1]
   
-  # perform calculation that stays the same
   diff_values <- larger_value - smaller_value
   return(diff_values)
 }
@@ -93,6 +100,16 @@ Test this function to verify that it works.
 Below check this function using the `lifeExp` column of the `gapminder` dataset.
 Also, verify that it gets the correct result for `1:10` (a sequence of numbers starting at 1 and ending at 10, increasing by 1), `5:100`, `gapminder$pop` (the population of each country in the `gapminder` data set), and `gapminder$gdpPercap`.
 
+```{r}
+ diff_range(gapminder$lifeExp)
+  x1 <- c(1:10)
+  x2 <- c(5:100)
+  
+  diff_range(x1)
+  diff_range(x2)
+  diff_range(gapminder$pop)
+  
+```
 
 
 
@@ -110,16 +127,34 @@ Convince yourself that you know how to use it by being able to explain what the 
 
 Also, explore this function with different `probs`.
 
+```{r exploring_quantiles}
+  quantile(gapminder$lifeExp)
+  quantile(gapminder$lifeExp, probs = 0.5)
+  quantile(gapminder$lifeExp, probs = c(0.25, 0.75))
+```
 
 
 Once, you feel comfortable with the `quantile` function, create a function named `quantile_range` that calculates the statistical range.
 
+```{r quantile_range}
+  quantile_range <- function(x, probs){
+    if(is.numeric(x)) {
+      quantile(x, probs = probs[2]) - quantile(x, probs = probs[1])
+    }
+    else stop("not numeric")
+  }
+  quantile_range(gapminder$lifeExp, probs = c(0.25, 0.75))
+  quantile_range(gapminder$lifeExp, probs = c(0, 1))
+```
 
 
 Test your function to verify that it works.
 Below check this function using the `lifeExp` column of the `gapminder` dataset.
 Also, verify that it gets the correct result for `1:10` (a sequence of numbers starting at 1 and ending at 10, increasing by 1), `5:100`, `gapminder$pop` (the population of each country in the `gapminder` data set), and `gapminder$gdpPercap`.
 
+```{r checking_quantile_range}
+quantile_range(gapminder$lifeExp,probs = c(0, 1))
+```
 
 
 ![](README-img/noun_pause.png) **Planned Pause Point**: This is the end of Part 1 of this activity. You can use the rest of the class period working on your project. The rest of this activity will be completed in our next class session/at home.
@@ -150,10 +185,17 @@ For functions that will be used again, it is a good practice to add argument val
 ...
 ```
 
+
+
 Explore the two argument validity checks by adding them to the beginning of your function above (one, then remove it and add the other) to check if the input `x` is a numeric vector (`is.numeric`).
 
 
-
+```{r adding_stop_function}
+range_new <- function(x){
+  if(is.numeric(x)) max(x)-min(x)
+  else stop("Not numeric.")
+}
+```
 
 ### Extend your function
 
@@ -173,9 +215,19 @@ Test your function with:
 
 Also test that your function breaks when it should.
 
+```{r create_quant_diff}
+quantile_range <- function(x, probs){
+  if(is.numeric(x)) {
+    quantile(x, probs = probs[2]) - quantile(x, probs = probs[1])
+  }
+  else stop("not numeric")
+}
+quantile_range(gapminder$lifeExp, probs = c(0.25, 0.75))
+quantile_range(gapminder$lifeExp, probs = c(0, 1))
+```
 
 
-
+**No errors. For the IQR of lifeExp we get 22.6475 years and the range is 59.004 years**
 
 Since you we using the `quantile` function in the `quantile_range` function, we should be consistent with the arguments that we specify.
 This is not necessary, but is extremely beneficial for humans to read, write, and use the code.
@@ -189,6 +241,9 @@ What happens if you call your `quantile_range` function, but do not supply speci
 That is, check `quantile_range(gapminder$lifeExp)`.
 
 
+```{r checking_quantdiff}
+quantile_range(gapminder$lifeExp)
+```
 
 
 
@@ -202,6 +257,15 @@ Check that your function works by specifying and not specifying the `probs` argu
 Then, upgrade your function to contain a validity check for the new `probs` argument.
 
 
+```{r adding_default_values}
+quantile_range <- function(x, probs = c(0,1)){
+  if(is.numeric(x)) {
+    quantile(x, probs = probs[2]) - quantile(x, probs = probs[1])
+  }
+  else stop("not numeric")
+}
+quantile_range(gapminder$lifeExp)
+```
 
 
 ### Handling `NA`s
@@ -213,19 +277,27 @@ What is the default value?
 ```{r}
 z <- gapminder$lifeExp
 z[3] <- NA
-
 quantile(gapminder$lifeExp)
 quantile(z)
 quantile(z, na.rm = TRUE)
 ```
 
-**Response:**
+
+**Default value is FALSE:**
 
 Setting `na.rm` within your function without providing users a way to override this behavior would be ill-advised.
 Update your `quant_diff` function to be more robust (i.e., handle `NA`s) while also providing users to control the behavior around `NA`s.
 You are welcome to enforce your preferred choice when defining the default behavior, but be sure to provide a way for users to control this.
 
-
+```{r NA_quant_diff}
+quant_diff<-function(x, probs=c(0, 1), na.rm=FALSE, ...){
+  if(is.numeric(x)){
+    quantile(x, probs=probs[2], na.rm=na.rm)-quantile(x, probs=probs[1], na.rm=na.rm)
+  }
+else stop ("Not Numeric")
+}
+quant_diff(z, na.rm=TRUE)
+```
 
 
 
@@ -266,7 +338,6 @@ Now we will see if it works within the `{tidyverse}`.
 In the code chunk below, calculate the IQR for the variable `gdpPercap` in the gapminder dataset for each continent in the year 2002.
 
 ```{r}
-
 ```
 
 
